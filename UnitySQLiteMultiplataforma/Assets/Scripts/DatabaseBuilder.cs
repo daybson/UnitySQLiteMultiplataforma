@@ -4,6 +4,7 @@ using UnityEngine;
 using Mono.Data.Sqlite;
 using System.IO;
 using UnityEngine.Networking;
+using System;
 
 public class DatabaseBuilder : MonoBehaviour
 {
@@ -18,9 +19,31 @@ public class DatabaseBuilder : MonoBehaviour
             Debug.LogError("Database name is empty!");
             return;
         }
+
         CopyDatabaseFileIfNotExists();
+
         //CreateDatabaseFileIfNotExists();
+
+        try
+        {
+            //CreateTableWeapon();
+            //CreateTableCharacter();
+
+            //InsertDataWeapon("Sword", 10, 25.89d);
+            InsertDataCharacter("Kaz", 2, 1, 3, 10, 1);
+            //Debug.Log(GetCharacter(1));
+            //Debug.Log("DELETE CHARACTER: " + DeleteCharacter(1));
+            Debug.Log(UpdateCharacter(1, "Kaz Kazyamof", 4, 5, 6, 7, 2));
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.Message);
+        }
+
     }
+
+
+    #region Create database
 
     private void CopyDatabaseFileIfNotExists()
     {
@@ -48,13 +71,13 @@ public class DatabaseBuilder : MonoBehaviour
 
         isAndroid = true;
         originDatabasePath = "jar:file://" + Application.dataPath + "!/assets" + this.DatabaseName;
-        StartCoroutine(GetInternalFileAndroid(originalDatabasePath));
+        StartCoroutine(GetInternalFileAndroid(originDatabasePath));
 
 #elif UNITY_WEBGL
 
         isAndroid = true;
         originDatabasePath = Path.Combine(Application.streamingAssetsPath, this.DatabaseName);
-        StartCoroutine(GetInternalFileAndroid(originalDatabasePath));
+        StartCoroutine(GetInternalFileAndroid(originDatabasePath));
 
 #endif
 
@@ -73,7 +96,6 @@ public class DatabaseBuilder : MonoBehaviour
         }
     }
 
-
     private IEnumerator GetInternalFileAndroid(string path)
     {
         var request = UnityWebRequest.Get(path);
@@ -90,4 +112,188 @@ public class DatabaseBuilder : MonoBehaviour
         }
     }
 
+    #endregion
+
+
+    protected void CreateTableCharacter()
+    {
+        var commandText =
+            "CREATE TABLE Character " +
+            "(" +
+            "   Id INTEGER PRIMARY KEY, " +
+            "   Name TEXT NOT NULL, " +
+            "   Attack INTEGER NOT NULL, " +
+            "   Defense INTEGER NOT NULL, " +
+            "   Agility INTEGER NOT NULL, " +
+            "   Health INTEGER NOT NULL, " +
+            "   WeaponId INTEGER, " +
+            "   FOREIGN KEY (WeaponId) REFERENCES Weapon(Id) ON UPDATE CASCADE ON DELETE RESTRICT" +
+            "); ";
+
+        using (var connection = Connection)
+        {
+            connection.Open();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = commandText;
+                command.ExecuteNonQuery();
+                Debug.Log("CreateTableCharacter");
+            }
+        }
+    }
+
+    protected void CreateTableWeapon()
+    {
+        var commandText =
+            "CREATE TABLE Weapon " +
+            "(" +
+            "   Id INTEGER PRIMARY KEY, " +
+            "   Name TEXT NOT NULL, " +
+            "   Attack INTEGER NOT NULL, " +
+            "   Price REAL NOT NULL" +
+            "); ";
+
+        using (var connection = Connection)
+        {
+            connection.Open();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = commandText;
+                command.ExecuteNonQuery();
+                Debug.Log("CreateTableWeapon");
+            }
+        }
+    }
+
+
+    protected void InsertDataWeapon(string name, int attack, double price)
+    {
+        var commandText = "INSERT INTO Weapon(Name, Attack, Price) VALUES (@name, @attack, @price);";
+
+        using (var connection = Connection)
+        {
+            connection.Open();
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = commandText;
+
+                command.Parameters.AddWithValue("@name", name);
+                command.Parameters.AddWithValue("@attack", attack);
+                command.Parameters.AddWithValue("@price", price);
+
+                var result = command.ExecuteNonQuery();
+                Debug.Log($"INSERT WEAPON: {result.ToString()}");
+            }
+        }
+    }
+
+    protected void InsertDataCharacter(string name, int attack, int defense, int agility, int health, int weaponId)
+    {
+        var commandText = "INSERT INTO Character(Name, Attack, Defense, Agility, Health, WeaponId) " +
+            " VALUES (@name, @attack, @defense, @agility, @health, @weaponId);";
+
+        using (var connection = Connection)
+        {
+            connection.Open();
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = commandText;
+
+                command.Parameters.AddWithValue("@name", name);
+                command.Parameters.AddWithValue("@attack", attack);
+                command.Parameters.AddWithValue("@defense", defense);
+                command.Parameters.AddWithValue("@agility", agility);
+                command.Parameters.AddWithValue("@health", health);
+                command.Parameters.AddWithValue("@weaponId", weaponId);
+
+                var result = command.ExecuteNonQuery();
+                Debug.Log($"INSERT CHARACTER: {result.ToString()}");
+            }
+        }
+    }
+
+    protected string GetCharacter(int id)
+    {
+        var commandText = "SELECT * FROM Character WHERE Id = @id;";
+        var result = "None";
+
+        using (var connection = Connection)
+        {
+            connection.Open();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = commandText;
+                command.Parameters.AddWithValue("@id", id);
+
+                var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    result = $"Id: {reader.GetInt32(0).ToString()}, " +
+                        $"Name: {reader.GetString(1)}, " +
+                        $"Attack: {reader.GetInt32(2)}, " +
+                        $"Defense: {reader["Defense"]}, " +
+                        $"Agility: {reader["Agility"]}," +
+                        $"Health: {reader["Health"]}, " +
+                        $"Weapon Id: {reader["WeaponId"]}";
+                }
+
+                return result;
+            }
+        }
+    }
+
+
+    protected int DeleteCharacter(int id)
+    {
+        var commandText = "DELETE FROM Character WHERE Id = @id;";
+
+        using (var connection = Connection)
+        {
+            connection.Open();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = commandText;
+                command.Parameters.AddWithValue("@id", id);
+
+                return command.ExecuteNonQuery();
+            }
+        }
+    }
+
+
+    protected int UpdateCharacter(int id, string name, int attack, int defense, int agility, int health, int weaponId)
+    {
+        var commandText = 
+            "UPDATE Character SET " +
+            "Name = @name, " +
+            "Attack = @attack, " +
+            "Defense = @defense, " +
+            "Agility = @agility, " +
+            "Health = @health, " +
+            "WeaponId = @weaponId " +
+            "WHERE Id = @id;";
+
+        using (var connection = Connection)
+        {
+            connection.Open();
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = commandText;
+
+                command.Parameters.AddWithValue("@id", id);
+                command.Parameters.AddWithValue("@name", name);
+                command.Parameters.AddWithValue("@attack", attack);
+                command.Parameters.AddWithValue("@defense", defense);
+                command.Parameters.AddWithValue("@agility", agility);
+                command.Parameters.AddWithValue("@health", health);
+                command.Parameters.AddWithValue("@weaponId", weaponId);
+
+                return command.ExecuteNonQuery();                
+            }
+        }
+    }
 }
