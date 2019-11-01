@@ -5,13 +5,10 @@ using UnityEngine.UI;
 
 public class PathTest : MonoBehaviour
 {
-    public Text text;
+    public Text uiText;
 
     void Start()
     {
-        text.text = $"DATA PATH: {Application.dataPath}";
-        text.text += $"\n\nPERSISTENT DATA PATH: {Application.persistentDataPath}";
-        text.text += $"\n\nSTREAMING ASSETS PATH: {Application.streamingAssetsPath}";
+        uiText.text = $"Data Path:{Application.dataPath}\n\n Persistent DataPath:{Application.persistentDataPath}\n\nStreaming Assets:{Application.streamingAssetsPath}";
     }
-
 }

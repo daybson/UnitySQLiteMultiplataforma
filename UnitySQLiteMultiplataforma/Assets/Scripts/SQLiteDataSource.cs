@@ -6,34 +6,31 @@ using System.IO;
 using UnityEngine.Networking;
 using System;
 
-public class DatabaseBuilder : MonoBehaviour
+public class SQLiteDataSource : MonoBehaviour
 {
-    public string DatabaseName;
+    [SerializeField]
+    protected string databaseName;
     protected string databasePath;
-    protected SqliteConnection Connection => new SqliteConnection($"Data Source = {this.databasePath};");
+    public SqliteConnection Connection => new SqliteConnection($"Data Source = {this.databasePath};");
+
+    [SerializeField]
+    protected bool copyDatabase;
 
     private void Awake()
     {
-        if (string.IsNullOrEmpty(this.DatabaseName))
+        if (string.IsNullOrEmpty(this.databaseName))
         {
             Debug.LogError("Database name is empty!");
             return;
         }
 
-        CopyDatabaseFileIfNotExists();
-
-        //CreateDatabaseFileIfNotExists();
 
         try
         {
-            //CreateTableWeapon();
-            //CreateTableCharacter();
-
-            //InsertDataWeapon("Sword", 10, 25.89d);
-            InsertDataCharacter("Kaz", 2, 1, 3, 10, 1);
-            //Debug.Log(GetCharacter(1));
-            //Debug.Log("DELETE CHARACTER: " + DeleteCharacter(1));
-            Debug.Log(UpdateCharacter(1, "Kaz Kazyamof", 4, 5, 6, 7, 2));
+            if (this.copyDatabase)
+                CopyDatabaseFileIfNotExists();
+            //else
+            //CreateDatabaseFileIfNotExists();
         }
         catch (Exception e)
         {
@@ -47,7 +44,7 @@ public class DatabaseBuilder : MonoBehaviour
 
     private void CopyDatabaseFileIfNotExists()
     {
-        this.databasePath = Path.Combine(Application.persistentDataPath, this.DatabaseName);
+        this.databasePath = Path.Combine(Application.persistentDataPath, this.databaseName);
 
         if (File.Exists(this.databasePath))
             return;
@@ -57,7 +54,7 @@ public class DatabaseBuilder : MonoBehaviour
 
 #if UNITY_EDITOR || UNITY_WP8 || UNITY_WINRT
 
-        originDatabasePath = Path.Combine(Application.streamingAssetsPath, this.DatabaseName);
+        originDatabasePath = Path.Combine(Application.streamingAssetsPath, this.databaseName);
 
 #elif UNITY_STANDALONE_OSX
 
@@ -73,12 +70,6 @@ public class DatabaseBuilder : MonoBehaviour
         originDatabasePath = "jar:file://" + Application.dataPath + "!/assets" + this.DatabaseName;
         StartCoroutine(GetInternalFileAndroid(originDatabasePath));
 
-#elif UNITY_WEBGL
-
-        isAndroid = true;
-        originDatabasePath = Path.Combine(Application.streamingAssetsPath, this.DatabaseName);
-        StartCoroutine(GetInternalFileAndroid(originDatabasePath));
-
 #endif
 
         if (!isAndroid)
@@ -87,7 +78,7 @@ public class DatabaseBuilder : MonoBehaviour
 
     private void CreateDatabaseFileIfNotExists()
     {
-        this.databasePath = Path.Combine(Application.persistentDataPath, this.DatabaseName);
+        this.databasePath = Path.Combine(Application.persistentDataPath, this.databaseName);
 
         if (!File.Exists(this.databasePath))
         {
@@ -115,6 +106,7 @@ public class DatabaseBuilder : MonoBehaviour
     #endregion
 
 
+    /*
     protected void CreateTableCharacter()
     {
         var commandText =
@@ -245,7 +237,6 @@ public class DatabaseBuilder : MonoBehaviour
         }
     }
 
-
     protected int DeleteCharacter(int id)
     {
         var commandText = "DELETE FROM Character WHERE Id = @id;";
@@ -263,10 +254,9 @@ public class DatabaseBuilder : MonoBehaviour
         }
     }
 
-
     protected int UpdateCharacter(int id, string name, int attack, int defense, int agility, int health, int weaponId)
     {
-        var commandText = 
+        var commandText =
             "UPDATE Character SET " +
             "Name = @name, " +
             "Attack = @attack, " +
@@ -292,8 +282,10 @@ public class DatabaseBuilder : MonoBehaviour
                 command.Parameters.AddWithValue("@health", health);
                 command.Parameters.AddWithValue("@weaponId", weaponId);
 
-                return command.ExecuteNonQuery();                
+                return command.ExecuteNonQuery();
             }
         }
     }
+
+    */
 }

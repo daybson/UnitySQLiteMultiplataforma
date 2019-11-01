@@ -323,7 +323,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 475be21ea85de2d41962c53bc3fe9169, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DatabaseName: GamesCode.db
+  databaseName: 
+  copyDatabase: 1
 --- !u!4 &2100041961
 Transform:
   m_ObjectHideFlags: 0
