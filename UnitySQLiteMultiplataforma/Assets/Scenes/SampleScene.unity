@@ -320,11 +320,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 2100041959}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 475be21ea85de2d41962c53bc3fe9169, type: 3}
+  m_Script: {fileID: 11500000, guid: 9b1ad556399d80d449cfe665d0aff04c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  databaseName: 
-  copyDatabase: 1
+  databaseName: ASASAS
+  copyDatabase: 0
 --- !u!4 &2100041961
 Transform:
   m_ObjectHideFlags: 0

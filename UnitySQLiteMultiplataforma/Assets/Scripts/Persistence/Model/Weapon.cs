@@ -16,4 +16,8 @@ public class Weapon
         Attack = attack;
         Price = price;
     }
+
+    public Weapon()
+    {
+    }
 }

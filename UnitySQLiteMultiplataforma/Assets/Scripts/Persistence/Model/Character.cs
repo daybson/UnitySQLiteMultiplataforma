@@ -22,4 +22,8 @@ public class Character
         Health = health;
         WeaponId = weaponId;
     }
+
+    public Character()
+    {
+    }
 }

@@ -5,25 +5,27 @@ using Mono.Data.Sqlite;
 using System.IO;
 using UnityEngine.Networking;
 using System;
+using Assets.Scripts.Persistence.DAO.Specification;
 
-public class SQLiteDataSource : MonoBehaviour
+public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
 {
     [SerializeField]
     protected string databaseName;
     protected string databasePath;
+    public string DatabaseName => this.databaseName;
+
     public SqliteConnection Connection => new SqliteConnection($"Data Source = {this.databasePath};");
 
     [SerializeField]
     protected bool copyDatabase;
 
-    private void Awake()
+    protected void Awake()
     {
         if (string.IsNullOrEmpty(this.databaseName))
         {
             Debug.LogError("Database name is empty!");
             return;
         }
-
 
         try
         {
@@ -36,13 +38,12 @@ public class SQLiteDataSource : MonoBehaviour
         {
             Debug.LogError(e.Message);
         }
-
     }
 
 
     #region Create database
 
-    private void CopyDatabaseFileIfNotExists()
+    protected void CopyDatabaseFileIfNotExists()
     {
         this.databasePath = Path.Combine(Application.persistentDataPath, this.databaseName);
 
@@ -76,7 +77,7 @@ public class SQLiteDataSource : MonoBehaviour
             File.Copy(originDatabasePath, this.databasePath);
     }
 
-    private void CreateDatabaseFileIfNotExists()
+    protected void CreateDatabaseFileIfNotExists()
     {
         this.databasePath = Path.Combine(Application.persistentDataPath, this.databaseName);
 
@@ -87,7 +88,7 @@ public class SQLiteDataSource : MonoBehaviour
         }
     }
 
-    private IEnumerator GetInternalFileAndroid(string path)
+    protected IEnumerator GetInternalFileAndroid(string path)
     {
         var request = UnityWebRequest.Get(path);
         yield return request.SendWebRequest();
