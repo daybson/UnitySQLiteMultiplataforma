@@ -8,7 +8,7 @@ public class Weapon
     public string Name { get; set; }
     public int Attack { get; set; }
     public double Price { get; set; }
- 
+
     public Weapon(int id, string name, int attack, double price)
     {
         Id = id;
@@ -19,5 +19,10 @@ public class Weapon
 
     public Weapon()
     {
+    }
+
+    public override string ToString()
+    {
+        return $"ID: {Id} NAME: {Name} ATK: {Attack} ${Price}";
     }
 }
