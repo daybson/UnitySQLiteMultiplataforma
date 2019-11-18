@@ -35,12 +35,12 @@ public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
 
     }
 
-
     #region Create database
 
     protected void CopyDatabaseFileIfNotExists()
     {
         this.databasePath = Path.Combine(Application.persistentDataPath, this.databaseName);
+        Debug.LogWarning("PATH: " + this.databasePath);
 
         if (File.Exists(this.databasePath))
             return;
@@ -48,7 +48,7 @@ public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
         var originDatabasePath = string.Empty;
         var isAndroid = false;
 
-#if UNITY_EDITOR || UNITY_WP8 || UNITY_WINRT
+#if UNITY_EDITOR || UNITY_WP8 || UNITY_WINRT || UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
 
         originDatabasePath = Path.Combine(Application.streamingAssetsPath, this.databaseName);
 
@@ -63,13 +63,16 @@ public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
 #elif UNITY_ANDROID
 
         isAndroid = true;
-        originDatabasePath = "jar:file://" + Application.dataPath + "!/assets" + this.DatabaseName;
+        originDatabasePath = "jar:file://" + Application.dataPath + "!/assets/" + this.DatabaseName;
         StartCoroutine(GetInternalFileAndroid(originDatabasePath));
 
 #endif
 
         if (!isAndroid)
+        {
+            Debug.LogWarning($"COPY FILE: {originDatabasePath} to {this.databasePath}");
             File.Copy(originDatabasePath, this.databasePath);
+        }
     }
 
     protected void CreateDatabaseFileIfNotExists()
@@ -91,14 +94,16 @@ public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
         if (request.isHttpError || request.isNetworkError)
         {
             Debug.LogError($"Error reading android file!: {request.error}");
+            throw new Exception($"Error reading android file!: { request.error }");
         }
         else
         {
             File.WriteAllBytes(this.databasePath, request.downloadHandler.data);
-            Debug.Log("File copied!");
+            Debug.Log("File copied! ->" + this.databasePath);
         }
     }
 
+    
     #endregion
 
 

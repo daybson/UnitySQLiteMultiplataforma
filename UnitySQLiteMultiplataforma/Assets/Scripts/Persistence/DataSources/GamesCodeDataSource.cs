@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GamesCodeDataSource : SQLiteDataSource
 {
@@ -37,7 +38,10 @@ public class GamesCodeDataSource : SQLiteDataSource
 
         try
         {
+            Debug.Log("this.databaseName :" + this.databaseName);
+
             base.Awake();
+
             CharacterDAO = new CharacterDAO(this);
             WeaponDAO = new WeaponDAO(this);
         }
@@ -45,7 +49,5 @@ public class GamesCodeDataSource : SQLiteDataSource
         {
             Debug.LogError($"Database not created! {ex.Message}");
         }
-
-        print("Awake GamesCode");
     }
 }

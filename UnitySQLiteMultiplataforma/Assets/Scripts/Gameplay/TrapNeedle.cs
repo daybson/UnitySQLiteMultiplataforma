@@ -8,13 +8,13 @@ public class TrapNeedle : MonoBehaviour
 
     void Start()
     {
-        this.weapon = GamesCodeDataSource.Instance.WeaponDAO.GetWeapon(3);
-        print(this.weapon.Name);
+        this.weapon = GamesCodeDataSource.Instance.WeaponDAO?.GetWeapon(3);
+        print(this.weapon?.Name);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Player")
+        if (other.gameObject.tag == "Player" && this.weapon != null)
         {
             print("atacou personagem");
             other.GetComponent<CharacterController>().TakeDamage(this.weapon.Attack);

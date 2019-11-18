@@ -13,9 +13,12 @@ public class CharacterController : MonoBehaviour
     protected Weapon weapon;
 
     public Slider LiferBar;
+    protected TouchController touchController;
 
     void Start()
     {
+        this.touchController = FindObjectOfType<TouchController>();
+
         this.character = GamesCodeDataSource.Instance.CharacterDAO.GetCharacter(1);
         this.weapon = GamesCodeDataSource.Instance.WeaponDAO.GetWeapon(this.character.WeaponId);
 
@@ -27,7 +30,11 @@ public class CharacterController : MonoBehaviour
 
     void Update()
     {
+#if UNITY_ANDROID || UNITY_IOS
+        var movement = new Vector3(this.touchController.Direction.x, 0, this.touchController.Direction.y);
+#else
         var movement = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+#endif
         if (movement.x != 0 || movement.z != 0)
         {
             transform.Translate(movement * WalkSpeed * Time.deltaTime);
@@ -35,7 +42,6 @@ public class CharacterController : MonoBehaviour
         }
         else
             this.animator.SetBool("speed", false);
-
 
         var mouseX = Input.GetAxis("Mouse X");
         if (mouseX != 0)
