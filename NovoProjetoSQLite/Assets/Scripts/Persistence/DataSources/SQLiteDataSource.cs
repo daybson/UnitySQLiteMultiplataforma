@@ -10,6 +10,8 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 
+using System.Linq;
+
 
 public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
 {
@@ -25,6 +27,8 @@ public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
 
     public static Action registerInitialLoad;
 
+    private const int codeVersion = 3;
+    private const string tagVersion = "DB_VERSION";
 
     protected void Awake()
     {
@@ -52,23 +56,42 @@ public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
         {
             Debug.LogError(e.Message);
         }
+         
+
+        var savedVersion = PlayerPrefs.GetInt(tagVersion, -1);
+        if (codeVersion > savedVersion) //verifica se precisa migrar de versão
+        {
+            if (savedVersion == -1) //é a primeira execução?
+                savedVersion = codeVersion;
+
+            for (var v = savedVersion + 1; v <= codeVersion; v++)
+            {
+                using (var connection = Connection)
+                {
+                    connection.Open();
+                    using (var command = connection.CreateCommand())
+                    {
+                        try
+                        {
+                            var scripts = SQLMigration.versionScripts[v];
+
+                            for (var s = 0; s < scripts.Count; s++)
+                            {
+                                command.CommandText = scripts[s];
+                                command.ExecuteNonQuery();
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+
+            PlayerPrefs.SetInt(tagVersion, codeVersion);
+        }
+
     }
 
     #region Create database
-
-    /// <summary>
-    /// NEW 2021
-    /// </summary>
-    protected void DeleteDatabase()
-    {
-        this.databasePath = Path.Combine(Application.persistentDataPath, this.databaseName);
-
-        if (!File.Exists(this.databasePath))
-            return;
-
-        File.Delete(this.databasePath);
-    }
-
 
     protected void CopyDatabaseFileIfNotExists()
     {
