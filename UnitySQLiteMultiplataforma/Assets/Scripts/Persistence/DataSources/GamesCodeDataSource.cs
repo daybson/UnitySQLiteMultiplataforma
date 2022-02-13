@@ -1,7 +1,9 @@
 ﻿using Assets.Scripts.Persistence.DAO.Implementation;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +13,7 @@ public class GamesCodeDataSource : SQLiteDataSource
     public WeaponDAO WeaponDAO { get; protected set; }
 
     private static GamesCodeDataSource instance;
+
     public static GamesCodeDataSource Instance
     {
         get
@@ -18,7 +21,7 @@ public class GamesCodeDataSource : SQLiteDataSource
             if (instance == null)
             {
                 instance = FindObjectOfType<GamesCodeDataSource>();
-                
+
                 if (instance == null)
                 {
                     var gamesCodeDataSourceObject = new GameObject("GamesCodeDataSource");
@@ -31,8 +34,11 @@ public class GamesCodeDataSource : SQLiteDataSource
         }
     }
 
-    protected void Awake()
+    protected new void Awake()
     {
+        CharacterDAO = new CharacterDAO(Instance);
+        WeaponDAO = new WeaponDAO(Instance);
+
         this.databaseName = "GamesCode.db";
         this.copyDatabase = true;
 
@@ -42,8 +48,6 @@ public class GamesCodeDataSource : SQLiteDataSource
 
             base.Awake();
 
-            CharacterDAO = new CharacterDAO(this);
-            WeaponDAO = new WeaponDAO(this);
         }
         catch (Exception ex)
         {

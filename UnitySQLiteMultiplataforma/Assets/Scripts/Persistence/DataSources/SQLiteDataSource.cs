@@ -19,6 +19,9 @@ public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
     [SerializeField]
     protected bool copyDatabase;
 
+
+    internal static Action RegisterInitialLoad;
+
     protected void Awake()
     {
         print("SQLiteDataSource Awake");
@@ -43,7 +46,10 @@ public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
         Debug.LogWarning("PATH: " + this.databasePath);
 
         if (File.Exists(this.databasePath))
+        {
+            RegisterInitialLoad?.Invoke(); //NOVO
             return;
+        }
 
         var originDatabasePath = string.Empty;
         var isAndroid = false;
@@ -72,6 +78,7 @@ public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
         {
             Debug.LogWarning($"COPY FILE: {originDatabasePath} to {this.databasePath}");
             File.Copy(originDatabasePath, this.databasePath);
+            RegisterInitialLoad?.Invoke(); //NOVO
         }
     }
 
@@ -100,10 +107,12 @@ public class SQLiteDataSource : MonoBehaviour, ISQLiteConnectionProvider
         {
             File.WriteAllBytes(this.databasePath, request.downloadHandler.data);
             Debug.Log("File copied! ->" + this.databasePath);
+            RegisterInitialLoad?.Invoke(); //NOVO
         }
     }
 
-    
+
+
     #endregion
 
 
